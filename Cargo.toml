@@ -1,0 +1,19 @@
+[package]
+name = "btc_brute"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thread-id = "4.0.0"
+clap = { version = "3.1.6", features = ["derive"] }
+ripemd = "0.1.1"
+sha2 = "0.10.2"
+rand = "0.8"
+num-bigint = { version = "0.4", features = ["rand"] }
+secp256k1 = "0.22.0"
+fasthash = "0.4.0"
+anyhow = "1.0.56"
+num_cpus = "1.13.1"
+bs58 = "0.4.0"
