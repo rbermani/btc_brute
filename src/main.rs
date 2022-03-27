@@ -183,7 +183,7 @@ fn main() -> Result<()> {
                         println!("Found a secret key matching an address in address list format:");
                         println!("PrivKey: {:?}", rndbytes);
                         let mut f = fh.lock().unwrap();
-                        f.write_fmt(format_args!("Private Key: {:?}", rndbytes))
+                        writeln!(&mut f, "Private Key: {:?}", rndbytes)
                             .expect("File Write Failed");
                         f.flush().expect("File Flush Failed");
                     }
