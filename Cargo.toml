@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-thread-id = "4.0.0"
 clap = { version = "3.1.6", features = ["derive"] }
 ripemd = "0.1.1"
 sha2 = "0.10.2"

@@ -1,3 +1,4 @@
+// Copyright (C) 2020-2022 Robert Bermani
 // Test address: 15hsQvBYKcJzJfKWDHzLN1CzZ8K9WWJbSZ
 use anyhow::{bail, Result};
 use clap::Parser;
@@ -13,7 +14,6 @@ use std::io::{prelude::*, BufReader};
 use std::str::Lines;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use thread_id;
 
 const ADDRESS_FILE: &str = "address.txt";
 const BS58_OUT_FILE: &str = "bs58outfile.bin";
@@ -171,7 +171,7 @@ fn main() -> Result<()> {
             println!("Spawning compute thread {}", cnt);
             let mut rng = rand::thread_rng();
             loop {
-                println!("Generating new {} try interval on thread {}", args.interval, thread_id::get());
+                println!("Generating new {} try interval on thread {}", args.interval, cnt);
                 let mut rndnum = rng.gen_biguint(SECRETKEY_BITS);
                 for _ in 0..args.interval {
                     let mut rndvec = rndnum.to_bytes_be();
