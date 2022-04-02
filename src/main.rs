@@ -1,6 +1,7 @@
 // Copyright (C) 2020-2022 Robert Bermani
 // Test address: 15hsQvBYKcJzJfKWDHzLN1CzZ8K9WWJbSZ
 use anyhow::{bail, Result};
+use bitcoin_bech32::WitnessProgram;
 use clap::Parser;
 use fasthash::xx;
 use num_bigint::RandBigInt;
@@ -100,13 +101,22 @@ fn convert_address_to_rm160bin() -> Result<()> {
     let mut filebuf = String::new();
     let lines = parse_address_filebyline(&mut filebuf);
 
-    for line in lines {
+    for (cnt,line) in lines.enumerate() {
         if !line.is_empty() {
-            let mut raw_addr: [u8; BTC_ADDR_LEN] = [0xFF; BTC_ADDR_LEN];
-            bs58::decode(line).into(&mut raw_addr)?;
-
             let mut rm160_addr: [u8; 20] = [0; 20];
-            rm160_addr.copy_from_slice(&raw_addr[1..21]);
+            if line.starts_with("bc1") {
+                let wit_prog = WitnessProgram::from_address(line).unwrap();
+                let dec_rm160 = wit_prog.program();
+                if dec_rm160.len() != RM160_DIGEST_LEN {
+                    bail!("Line: {}: Decoded Bech32 address did not match RM160 digest len. len: {} expected: {}", cnt+1, dec_rm160.len(),
+                        RM160_DIGEST_LEN);
+                }
+                rm160_addr.copy_from_slice(dec_rm160);
+            } else {
+                let mut raw_addr: [u8; BTC_ADDR_LEN] = [0xFF; BTC_ADDR_LEN];
+                bs58::decode(line).into(&mut raw_addr)?;
+                rm160_addr.copy_from_slice(&raw_addr[1..21]);
+            }
 
             outfile.write_all(&rm160_addr)?;
         }
@@ -122,6 +132,7 @@ fn main() -> Result<()> {
         convert_address_to_rm160bin()?;
         println!("Base58 address memoization list was generated successfully.");
     }
+
 
     let mut num_cores = 1;
 
