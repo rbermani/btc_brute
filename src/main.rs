@@ -33,11 +33,36 @@ struct Args {
     interval: u32,
 }
 
+/// This function calculates the number of combinations nCr,
+/// which represents the number of possible combinations that
+/// can be obtained by taking a sample of items from a larger set.
+/// C(n,r) = n! / (r!(n-r)!) where ! is factorial operator.
+fn count_combinations(n: u64, r: u64) -> u64 {
+    if r > n {
+        0
+    } else {
+        (1..=r).fold(1, |acc, val| acc * (n - val + 1) / val)
+    }
+}
+
+/// Given an initial value of Hamming weight n, this function returns Some next value in the lexicographically ordered
+/// series of all values of Hamming weight n in 8 bits.
+/// It returns None on overflow or after final value in the series
+/// # Example
+/// For Hamming weight 2:
+/// init_value: 0b0000000011
+/// lexic_hamming_next(init_value) = Some(0b00000101)
+/// lexic_hamming_next(0b00000101) = Some(0b00001001)
+fn lexic_hamming_next(v: u8) -> Option<u8> {
+    let t: u8 = v | (v - 1);
+    let sub = v.trailing_zeros() + 1;
+    t.checked_add(1).map(|checked_ovf| checked_ovf | (((!t & ((!(!t))+1)) - 1) >> sub))
+}
+
 fn gen_and_check_keys(
     priv_key: &[u8; SECRETKEY_LEN],
     addr: &Arc<HashMap<u64, [u8; RM160_DIGEST_LEN]>>,
 ) -> bool {
-    let mut found_key = false;
     let secp = Secp256k1::new();
     let secret_key = SecretKey::from_slice(priv_key).expect("32 bytes, within curve order");
     let public_key = PublicKey::from_secret_key(&secp, &secret_key);
@@ -64,9 +89,22 @@ fn gen_and_check_keys(
     let hash160u = xx::hash64(&pkey_uncomp_rm160digest);
 
     if addr.contains_key(&hash160c) || addr.contains_key(&hash160u) {
-        found_key = true;
+        if let Some((_key,val)) = addr.get_key_value(&hash160u) {
+            if val == pkey_uncomp_rm160digest.as_slice() {
+                return true;
+            } else {
+                println!("xxHash64 key collision detected. Key hash matched, but not value.");
+            }
+        }
+        if let Some((_key,val)) = addr.get_key_value(&hash160c) {
+            if val == pkey_comp_rm160digest.as_slice() {
+                return true;
+            } else {
+                println!("xxHash64 key collision detected. Key hash matched, but not value.");
+            }
+        }
     }
-    found_key
+    false
 }
 
 fn read_binfile_lines(hash_map: &mut HashMap<u64, [u8; RM160_DIGEST_LEN]>) -> Result<()> {
