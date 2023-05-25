@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bitcoin-bech32 = "0.12.1"
+bitvec = "1.0.1"
 clap = { version = "3.1.6", features = ["derive"] }
 ripemd = "0.1.1"
 sha2 = "0.10.2"
